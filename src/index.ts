@@ -1,6 +1,12 @@
 import "dotenv/config";
 import express from "express";
-import { createPublicClient, http, isAddress, formatUnits, Address } from "viem";
+import {
+  createPublicClient,
+  http,
+  isAddress,
+  formatUnits,
+  Address,
+} from "viem";
 import { base, mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
 
@@ -38,7 +44,9 @@ const ERC20_ABI = [
 
 async function resolveAddress(input: string): Promise<Address> {
   if (input.endsWith(".eth")) {
-    const resolved = await mainnetClient.getEnsAddress({ name: normalize(input) });
+    const resolved = await mainnetClient.getEnsAddress({
+      name: normalize(input),
+    });
     if (!resolved) throw new Error(`Could not resolve ENS: ${input}`);
     return resolved;
   }
@@ -55,8 +63,17 @@ app.get("/balance", async (req, res) => {
   try {
     const resolved = await resolveAddress(address);
     const [balance, decimals] = await Promise.all([
-      baseClient.readContract({ address: BGBRD_TOKEN, abi: ERC20_ABI, functionName: "balanceOf", args: [resolved] }),
-      baseClient.readContract({ address: BGBRD_TOKEN, abi: ERC20_ABI, functionName: "decimals" }),
+      baseClient.readContract({
+        address: BGBRD_TOKEN,
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [resolved],
+      }),
+      baseClient.readContract({
+        address: BGBRD_TOKEN,
+        abi: ERC20_ABI,
+        functionName: "decimals",
+      }),
     ]);
 
     res.json({
@@ -64,7 +81,9 @@ app.get("/balance", async (req, res) => {
       balance: formatUnits(balance, decimals),
     });
   } catch (e) {
-    res.status(500).json({ error: e instanceof Error ? e.message : "Unknown error" });
+    res
+      .status(500)
+      .json({ error: e instanceof Error ? e.message : "Unknown error" });
   }
 });
 

@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { IncomingMessage, ServerResponse } from "http";
 import { createPublicClient, http, isAddress, formatUnits, Address } from "viem";
 import { base, mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
@@ -43,7 +43,7 @@ async function resolveAddress(input: string): Promise<Address> {
   throw new Error(`Invalid address: ${input}`);
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: IncomingMessage & { query: Record<string, string | string[]> }, res: ServerResponse & { json: (data: unknown) => void; status: (code: number) => { json: (data: unknown) => void } }) {
   const { address } = req.query;
   if (!address || typeof address !== "string") {
     return res.status(400).json({ error: "Missing address parameter" });
